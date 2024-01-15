@@ -94,11 +94,19 @@ router.get('/:id/download', async (req, res) => {
 router.post('/email', async (req, res) => {
     // 1 - validate request.
     const { id, emailFrom, emailTo } = req.body;
+
+    if (!id ||!emailFrom || !emailTo)
+        return res.status(400).json({ message: 'All fields are required.'});
+
     // 2 - check if file exists.
     const file = await File.findById(id);
     if (!file) {
         return res.status(404).json({ message: 'File does not exists.' });
     }
+
+    if (file.sender)
+        return res.status(400).json({ message: 'File is already sent.'});
+
     // 3 - create transporter.
     const authParam = {
         // @ts-ignore
